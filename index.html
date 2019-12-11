@@ -5,11 +5,53 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+
+  <title>Task list</title>
 </head>
 
 <body>
+  <div class="container">
 
+    <div class="row">
+      <div class="col-lg-8 mx-auto mt-5">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Add new task</h5>
+            <form>
+              <div class="form-group">
+                <label for="inputTitle">Title</label>
+                <input type="text" name="title" class="form-control" id="inputTitle" placeholder="Task title">
+              </div>
+              <div class="form-group">
+                <label for="inputBody">Body</label>
+                <input type="text" name="body" class="form-control" id="inputBody" placeholder="Task body">
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 mt-5">
+        <ul class="list-group">
+          <li class="list-group-item d-flex align-items-center flex-wrap mt-2">
+            <span>My title</span>
+            <button class="btn btn-danger ml-auto delete-btn">Delete</button>
+            <p class="mt-2 w-100">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi
+              soluta vitae sint tenetur quam quisquam explicabo quos? Aut iste
+              ut laborum iure aspernatur, nam ea quibusdam rerum minus magnam
+              dignissimos.
+            </p>
+        </ul>
+      </div>
+    </div>
+
+  </div>
 
   <script src="application.js"></script>
 </body>
