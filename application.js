@@ -39,6 +39,12 @@ const tasks = [
 
   // Elements UI
   const listOfTasks = document.querySelector(".row .list-group");
+  const form = document.forms["addTasks"];
+  const inputTitle = form.elements["title"];
+  const inputBody = form.elements["body"];
+
+  // Events
+  form.addEventListener("submit", onFormSubmitHandler);
 
   renderAllTasks(objOfTasks);
 
@@ -80,5 +86,36 @@ const tasks = [
     li.appendChild(paragraph);
 
     return li;
+  }
+
+  function onFormSubmitHandler(event) {
+    event.preventDefault();
+
+    const titleValue = inputTitle.value;
+    const bodyValue = inputBody.value;
+
+    if (!titleValue || !bodyValue) {
+      alert("Пожалуйста, введите Заголовок и Текст");
+      return;
+    }
+
+    const task = createNewTask(titleValue, bodyValue);
+    const listItem = listItemTemplate(task);
+
+    listOfTasks.insertAdjacentElement("afterbegin", listItem);
+    form.reset();
+  }
+
+  function createNewTask(title, body) {
+    const task = {
+      title,
+      body,
+      completed: false,
+      _id: `task-${Math.random}`
+    };
+
+    objOfTasks[task._id] = task;
+
+    return { ...task };
   }
 })(tasks);
