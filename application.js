@@ -50,7 +50,8 @@ const tasks = [
   renderAllTasks(objOfTasks);
 
   function renderAllTasks(tasksList) {
-    if (!tasksList) return;
+    const rendered = renderEmptyTaskList();
+    if (rendered) return;
 
     const fragment = document.createDocumentFragment();
     Object.values(tasksList).forEach(task => {
@@ -106,6 +107,10 @@ const tasks = [
 
     listOfTasks.insertAdjacentElement("afterbegin", listItem);
     form.reset();
+
+    const emptyTaskList = taskListIsEmpty();
+    const emptyTaskCard = document.querySelector("[data-empty-list-card]");
+    deleteFromHtml(!emptyTaskList, emptyTaskCard);
   }
 
   function createNewTask(title, body) {
@@ -113,7 +118,7 @@ const tasks = [
       title,
       body,
       completed: false,
-      _id: `task-${Math.random}`
+      _id: `task-${Math.random()}`
     };
 
     objOfTasks[task._id] = task;
@@ -135,11 +140,48 @@ const tasks = [
       const id = parent.dataset.taskId;
       const confirmed = deleteTask(id);
       deleteFromHtml(confirmed, parent);
+      renderEmptyTaskList();
     }
   }
 
   function deleteFromHtml(confirmed, element) {
     if (!confirmed) return;
+    if (!element) return;
+
     element.remove();
+  }
+
+  function createCardTemplate() {
+    const card = document.createElement("div");
+    card.classList.add("card");
+    card.dataset.emptyListCard = "on";
+
+    const cardBody = document.createElement("div");
+    cardBody.classList.add("card-body");
+
+    const cardTitle = document.createElement("h5");
+    cardTitle.classList.add("card-title");
+    cardTitle.textContent =
+      "Пока ваш список задач пуст... Добавьте новую задачу!";
+
+    cardBody.appendChild(cardTitle);
+    card.appendChild(cardBody);
+
+    return card;
+  }
+
+  function renderEmptyTaskList() {
+    if (taskListIsEmpty()) {
+      const card = createCardTemplate();
+
+      listOfTasks.insertAdjacentElement("afterend", card);
+
+      return true;
+    }
+    return false;
+  }
+
+  function taskListIsEmpty() {
+    return Object.keys(objOfTasks).length === 0;
   }
 })(tasks);
