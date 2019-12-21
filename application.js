@@ -46,6 +46,7 @@ const tasks = [
   // Events
   form.addEventListener("submit", onFormSubmitHandler);
   listOfTasks.addEventListener("click", onDeleteHandler);
+  listOfTasks.addEventListener("click", onEditHandler);
 
   renderAllTasks(objOfTasks);
 
@@ -74,19 +75,25 @@ const tasks = [
     li.dataset.taskId = _id;
 
     const span = document.createElement("span");
+    span.classList.add("font-weight-bold");
     span.textContent = title;
 
-    const button = document.createElement("button");
-    button.classList.add("btn", "btn-danger", "ml-auto", "delete-btn");
-    button.textContent = "Delete";
+    const buttonEdit = document.createElement("button");
+    buttonEdit.classList.add("btn", "btn-warning", "ml-auto", "edit-btn");
+    buttonEdit.textContent = "Изменить";
+
+    const buttonDelete = document.createElement("button");
+    buttonDelete.classList.add("btn", "btn-danger", "ml-1", "delete-btn");
+    buttonDelete.textContent = "Удалить";
 
     const paragraph = document.createElement("p");
     paragraph.classList.add("mt-2", "w-100");
     paragraph.textContent = body;
 
     li.appendChild(span);
-    li.appendChild(button);
     li.appendChild(paragraph);
+    li.appendChild(buttonEdit);
+    li.appendChild(buttonDelete);
 
     return li;
   }
@@ -126,6 +133,15 @@ const tasks = [
     return { ...task };
   }
 
+  function editTask(_id, title, body) {
+    const task = objOfTasks[_id];
+
+    task.title = title;
+    task.body = body;
+
+    return task;
+  }
+
   function deleteTask(id) {
     const { title } = objOfTasks[id];
     const isConfirm = confirm(`Вы уверены, что хотите удалить задачу ${title}`);
@@ -144,11 +160,51 @@ const tasks = [
     }
   }
 
+  function onEditHandler({ target }) {
+    if (target.classList.contains("edit-btn")) {
+      const parent = target.closest("[data-task-id]");
+      const id = parent.dataset.taskId;
+      const task = objOfTasks[id];
+      removeAllChilds(parent);
+      destroyAnotherEditForm();
+      const form = createEditForm(task);
+
+      parent.appendChild(form);
+    }
+  }
+
+  function onFormEditSubmitHandler(event) {
+    event.preventDefault();
+
+    const taskId = event.target.closest("[data-task-id]").dataset.taskId;
+
+    const titleValue = inputTitleEdit.value;
+    const bodyValue = inputBodyEdit.value;
+
+    if (!titleValue || !bodyValue) {
+      alert("Пожалуйста, введите Заголовок и Текст");
+      return;
+    }
+
+    const task = editTask(taskId, titleValue, bodyValue);
+
+    const listItemOld = event.target.closest(".list-group-item");
+
+    renderTaskItemAfterEdit(listItemOld, task);
+  }
+
   function deleteFromHtml(confirmed, element) {
     if (!confirmed) return;
     if (!element) return;
 
     element.remove();
+  }
+
+  function removeAllChilds(element) {
+    if (!element) return;
+    const childs = Array.from(element.children);
+
+    childs.forEach(child => element.removeChild(child));
   }
 
   function createCardTemplate() {
@@ -170,6 +226,61 @@ const tasks = [
     return card;
   }
 
+  function createEditForm(task) {
+    const form = document.createElement("form");
+    form.name = "editTask";
+    form.classList.add("w-100");
+    form.dataset.taskId = task._id;
+
+    const divGroupTitle = document.createElement("div");
+    divGroupTitle.classList.add("form-group");
+
+    const labelTitle = document.createElement("label");
+    labelTitle.htmlFor = "inputTitleEdit";
+    labelTitle.textContent = "Заголовок";
+
+    const inputTitle = document.createElement("input");
+    inputTitle.type = "text";
+    inputTitle.name = "title";
+    inputTitle.id = "inputTitleEdit";
+    inputTitle.value = task.title;
+    inputTitle.placeholder = "Текст заголовка";
+    inputTitle.classList.add("form-control");
+
+    divGroupTitle.appendChild(labelTitle);
+    divGroupTitle.appendChild(inputTitle);
+
+    const divGroupBody = document.createElement("div");
+    divGroupBody.classList.add("form-group");
+
+    const labelBody = document.createElement("label");
+    labelBody.htmlFor = "inputBodyEdit";
+    labelBody.textContent = "Текст задачи";
+
+    const textareaBody = document.createElement("textarea");
+    textareaBody.rows = "3";
+    textareaBody.name = "body";
+    textareaBody.id = "inputBodyEdit";
+    textareaBody.value = task.body;
+    textareaBody.placeholder = "Текст задачи";
+    textareaBody.classList.add("form-control");
+
+    divGroupBody.appendChild(labelBody);
+    divGroupBody.appendChild(textareaBody);
+
+    const buttonSubmit = document.createElement("button");
+    buttonSubmit.classList.add("btn", "btn-primary");
+    buttonSubmit.textContent = "Принять";
+    buttonSubmit.type = "submit";
+    form.addEventListener("submit", onFormEditSubmitHandler);
+
+    form.appendChild(divGroupTitle);
+    form.appendChild(divGroupBody);
+    form.appendChild(buttonSubmit);
+
+    return form;
+  }
+
   function renderEmptyTaskList() {
     if (taskListIsEmpty()) {
       const card = createCardTemplate();
@@ -183,5 +294,23 @@ const tasks = [
 
   function taskListIsEmpty() {
     return Object.keys(objOfTasks).length === 0;
+  }
+
+  function destroyAnotherEditForm() {
+    const editForm = document.forms.editTask;
+    if (!editForm) return;
+    const taskId = editForm.dataset.taskId;
+    const listItemOld = editForm.closest(".list-group-item");
+    const task = objOfTasks[taskId];
+
+    renderTaskItemAfterEdit(listItemOld, task);
+  }
+
+  function renderTaskItemAfterEdit(listItemOld, task) {
+    const listItemNew = listItemTemplate(task);
+
+    listItemOld.insertAdjacentElement("beforebegin", listItemNew);
+
+    deleteFromHtml(true, listItemOld);
   }
 })(tasks);

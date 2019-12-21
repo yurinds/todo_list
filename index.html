@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 
 <head>
   <meta charset="UTF-8">
@@ -18,15 +18,15 @@
       <div class="col-lg-8 mx-auto mt-5">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Add new task</h5>
+            <h5 class="card-title">Добавьте новую задачу</h5>
             <form name="addTasks">
               <div class="form-group">
-                <label for="inputTitle">Title</label>
+                <label for="inputTitle">Заголовок</label>
                 <input type="text" name="title" class="form-control" id="inputTitle" placeholder="Заголовок">
               </div>
               <div class="form-group">
-                <label for="inputBody">Body</label>
-                <input type="text" name="body" class="form-control" id="inputBody" placeholder="Текст">
+                <label for="inputBody">Текст задачи</label>
+                <textarea name="body" class="form-control" id="inputBody" rows="3" placeholder="Текст"></textarea>
               </div>
               <button type="submit" class="btn btn-primary">Submit</button>
             </form>
@@ -40,7 +40,8 @@
         <ul class="list-group">
           <!-- <li class="list-group-item d-flex align-items-center flex-wrap mt-2">
             <span>My title</span>
-            <button class="btn btn-danger ml-auto delete-btn">Delete</button>
+            <button class="btn btn-warning ml-auto change-btn">Изменить</button>
+            <button class="btn btn-danger delete-btn ml-1">Удалить</button>
             <p class="mt-2 w-100">
               Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deleniti doloribus veritatis ut labore nesciunt
               dolorem beatae quo voluptate rem qui, libero quos? Facere at dolores sed ullam atque, accusantium nulla.
