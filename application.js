@@ -42,16 +42,23 @@ const tasks = [
   const form = document.forms["addTasks"];
   const inputTitle = form.elements["title"];
   const inputBody = form.elements["body"];
+  const radioButtons = document.querySelector('[data-toggle="buttons"]');
 
   // Events
   form.addEventListener("submit", onFormSubmitHandler);
   listOfTasks.addEventListener("click", onDeleteHandler);
   listOfTasks.addEventListener("click", onEditHandler);
   listOfTasks.addEventListener("click", onCompleateHandler);
+  radioButtons.addEventListener("click", onSwitchingHandler);
 
-  renderAllTasks(objOfTasks);
+  refreshListOfTasks();
 
   // Events Callbacks
+
+  function onSwitchingHandler(event) {
+    const currentButton = event.target.querySelector('[name="options"]');
+    refreshListOfTasks(currentButton);
+  }
 
   function onFormSubmitHandler(event) {
     event.preventDefault();
@@ -78,10 +85,12 @@ const tasks = [
   function onFormEditSubmitHandler(event) {
     event.preventDefault();
 
-    const taskId = event.target.closest("[data-task-id]").dataset.taskId;
+    const form = event.target.closest("[data-task-id]");
 
-    const titleValue = inputTitleEdit.value;
-    const bodyValue = inputBodyEdit.value;
+    const taskId = form.dataset.taskId;
+
+    const titleValue = form.elements["title"].value;
+    const bodyValue = form.elements["body"].value;
 
     if (!titleValue || !bodyValue) {
       alert("Пожалуйста, введите Заголовок и Текст");
@@ -132,6 +141,7 @@ const tasks = [
       parent.classList.toggle("bg-success");
 
       refreshButton(target, task);
+      refreshListOfTasks();
     }
   }
 
@@ -367,5 +377,41 @@ const tasks = [
     } else {
       button.textContent = "Выполнена";
     }
+  }
+
+  function refreshListOfTasks(activeButton) {
+    if (!activeButton) {
+      activeButton = document
+        .querySelector(".btn.btn-outline-info.active")
+        .querySelector('[name="options"]');
+    }
+
+    const completedFilter = {
+      "all-tasks": (accum, task) => {
+        accum[task._id] = task;
+        return accum;
+      },
+      "completed-tasks": (accum, task) => {
+        if (!task.completed) return accum;
+
+        accum[task._id] = task;
+        return accum;
+      },
+      "uncompleted-tasks": (accum, task) => {
+        if (task.completed) return accum;
+
+        accum[task._id] = task;
+        return accum;
+      }
+    };
+
+    const tasks = Object.values(objOfTasks)
+      .sort((prev, next) => {
+        return prev.completed - next.completed;
+      })
+      .reduce(completedFilter[activeButton.id], {});
+
+    removeAllChilds(listOfTasks);
+    renderAllTasks(tasks);
   }
 })(tasks);
