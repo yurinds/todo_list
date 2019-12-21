@@ -47,56 +47,11 @@ const tasks = [
   form.addEventListener("submit", onFormSubmitHandler);
   listOfTasks.addEventListener("click", onDeleteHandler);
   listOfTasks.addEventListener("click", onEditHandler);
+  listOfTasks.addEventListener("click", onCompleateHandler);
 
   renderAllTasks(objOfTasks);
 
-  function renderAllTasks(tasksList) {
-    const rendered = renderEmptyTaskList();
-    if (rendered) return;
-
-    const fragment = document.createDocumentFragment();
-    Object.values(tasksList).forEach(task => {
-      const li = listItemTemplate(task);
-      fragment.appendChild(li);
-    });
-
-    listOfTasks.appendChild(fragment);
-  }
-
-  function listItemTemplate({ _id, body, title } = {}) {
-    const li = document.createElement("li");
-    li.classList.add(
-      "list-group-item",
-      "d-flex",
-      "align-items-center",
-      "flex-wrap",
-      "mt-2"
-    );
-    li.dataset.taskId = _id;
-
-    const span = document.createElement("span");
-    span.classList.add("font-weight-bold");
-    span.textContent = title;
-
-    const buttonEdit = document.createElement("button");
-    buttonEdit.classList.add("btn", "btn-warning", "ml-auto", "edit-btn");
-    buttonEdit.textContent = "Изменить";
-
-    const buttonDelete = document.createElement("button");
-    buttonDelete.classList.add("btn", "btn-danger", "ml-1", "delete-btn");
-    buttonDelete.textContent = "Удалить";
-
-    const paragraph = document.createElement("p");
-    paragraph.classList.add("mt-2", "w-100");
-    paragraph.textContent = body;
-
-    li.appendChild(span);
-    li.appendChild(paragraph);
-    li.appendChild(buttonEdit);
-    li.appendChild(buttonDelete);
-
-    return li;
-  }
+  // Events Callbacks
 
   function onFormSubmitHandler(event) {
     event.preventDefault();
@@ -120,59 +75,6 @@ const tasks = [
     deleteFromHtml(!emptyTaskList, emptyTaskCard);
   }
 
-  function createNewTask(title, body) {
-    const task = {
-      title,
-      body,
-      completed: false,
-      _id: `task-${Math.random()}`
-    };
-
-    objOfTasks[task._id] = task;
-
-    return { ...task };
-  }
-
-  function editTask(_id, title, body) {
-    const task = objOfTasks[_id];
-
-    task.title = title;
-    task.body = body;
-
-    return task;
-  }
-
-  function deleteTask(id) {
-    const { title } = objOfTasks[id];
-    const isConfirm = confirm(`Вы уверены, что хотите удалить задачу ${title}`);
-    if (!isConfirm) return isConfirm;
-    delete objOfTasks[id];
-    return isConfirm;
-  }
-
-  function onDeleteHandler({ target }) {
-    if (target.classList.contains("delete-btn")) {
-      const parent = target.closest("[data-task-id]");
-      const id = parent.dataset.taskId;
-      const confirmed = deleteTask(id);
-      deleteFromHtml(confirmed, parent);
-      renderEmptyTaskList();
-    }
-  }
-
-  function onEditHandler({ target }) {
-    if (target.classList.contains("edit-btn")) {
-      const parent = target.closest("[data-task-id]");
-      const id = parent.dataset.taskId;
-      const task = objOfTasks[id];
-      removeAllChilds(parent);
-      destroyAnotherEditForm();
-      const form = createEditForm(task);
-
-      parent.appendChild(form);
-    }
-  }
-
   function onFormEditSubmitHandler(event) {
     event.preventDefault();
 
@@ -193,18 +95,131 @@ const tasks = [
     renderTaskItemAfterEdit(listItemOld, task);
   }
 
-  function deleteFromHtml(confirmed, element) {
-    if (!confirmed) return;
-    if (!element) return;
-
-    element.remove();
+  function onDeleteHandler({ target }) {
+    if (target.classList.contains("delete-btn")) {
+      const parent = target.closest("[data-task-id]");
+      if (!parent) return;
+      const id = parent.dataset.taskId;
+      const confirmed = deleteTask(id);
+      deleteFromHtml(confirmed, parent);
+      renderEmptyTaskList();
+    }
   }
 
-  function removeAllChilds(element) {
-    if (!element) return;
-    const childs = Array.from(element.children);
+  function onEditHandler({ target }) {
+    if (target.classList.contains("edit-btn")) {
+      const parent = target.closest("[data-task-id]");
+      if (!parent) return;
+      const id = parent.dataset.taskId;
+      const task = objOfTasks[id];
+      removeAllChilds(parent);
+      destroyAnotherEditForm();
+      const form = createEditForm(task);
 
-    childs.forEach(child => element.removeChild(child));
+      parent.appendChild(form);
+    }
+  }
+
+  function onCompleateHandler({ target }) {
+    if (target.classList.contains("completed-btn")) {
+      const parent = target.closest("[data-task-id]");
+      if (!parent) return;
+      const id = parent.dataset.taskId;
+      const task = objOfTasks[id];
+
+      compleateTask(task);
+
+      parent.classList.toggle("bg-success");
+
+      refreshButton(target, task);
+    }
+  }
+
+  // Tasks
+
+  function editTask(_id, title, body) {
+    const task = objOfTasks[_id];
+
+    task.title = title;
+    task.body = body;
+
+    return task;
+  }
+
+  function deleteTask(id) {
+    const { title } = objOfTasks[id];
+    const isConfirm = confirm(`Вы уверены, что хотите удалить задачу ${title}`);
+    if (!isConfirm) return isConfirm;
+    delete objOfTasks[id];
+    return isConfirm;
+  }
+
+  function compleateTask(task) {
+    task.completed = !task.completed;
+
+    return task;
+  }
+
+  function createNewTask(title, body) {
+    const task = {
+      title,
+      body,
+      completed: false,
+      _id: `task-${Math.random()}`
+    };
+
+    objOfTasks[task._id] = task;
+
+    return { ...task };
+  }
+
+  // DOM Elements
+
+  function listItemTemplate({ _id, body, title, completed } = {}) {
+    const li = document.createElement("li");
+    li.classList.add(
+      "list-group-item",
+      "d-flex",
+      "align-items-center",
+      "flex-wrap",
+      "mt-2"
+    );
+    if (completed) li.classList.add("bg-success");
+
+    li.dataset.taskId = _id;
+
+    const span = document.createElement("span");
+    span.classList.add("font-weight-bold");
+    span.textContent = title;
+
+    const button = document.createElement("button");
+    if (completed) {
+      button.classList.add("btn", "btn-secondary", "ml-auto", "completed-btn");
+      button.textContent = "Не выполнена";
+    } else {
+      button.classList.add("btn", "btn-success", "ml-auto", "completed-btn");
+      button.textContent = "Выполнена";
+    }
+
+    const buttonEdit = document.createElement("button");
+    buttonEdit.classList.add("btn", "btn-warning", "ml-1", "edit-btn");
+    buttonEdit.textContent = "Изменить";
+
+    const buttonDelete = document.createElement("button");
+    buttonDelete.classList.add("btn", "btn-danger", "ml-1", "delete-btn");
+    buttonDelete.textContent = "Удалить";
+
+    const paragraph = document.createElement("p");
+    paragraph.classList.add("mt-2", "w-100");
+    paragraph.textContent = body;
+
+    li.appendChild(span);
+    li.appendChild(paragraph);
+    li.appendChild(button);
+    li.appendChild(buttonEdit);
+    li.appendChild(buttonDelete);
+
+    return li;
   }
 
   function createCardTemplate() {
@@ -281,6 +296,35 @@ const tasks = [
     return form;
   }
 
+  // Other
+
+  function renderAllTasks(tasksList) {
+    const rendered = renderEmptyTaskList();
+    if (rendered) return;
+
+    const fragment = document.createDocumentFragment();
+    Object.values(tasksList).forEach(task => {
+      const li = listItemTemplate(task);
+      fragment.appendChild(li);
+    });
+
+    listOfTasks.appendChild(fragment);
+  }
+
+  function deleteFromHtml(confirmed, element) {
+    if (!confirmed) return;
+    if (!element) return;
+
+    element.remove();
+  }
+
+  function removeAllChilds(element) {
+    if (!element) return;
+    const childs = Array.from(element.children);
+
+    childs.forEach(child => element.removeChild(child));
+  }
+
   function renderEmptyTaskList() {
     if (taskListIsEmpty()) {
       const card = createCardTemplate();
@@ -312,5 +356,16 @@ const tasks = [
     listItemOld.insertAdjacentElement("beforebegin", listItemNew);
 
     deleteFromHtml(true, listItemOld);
+  }
+
+  function refreshButton(button, { completed }) {
+    button.classList.toggle("btn-success");
+    button.classList.toggle("btn-secondary");
+
+    if (completed) {
+      button.textContent = "Не выполнена";
+    } else {
+      button.textContent = "Выполнена";
+    }
   }
 })(tasks);
