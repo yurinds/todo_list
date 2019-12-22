@@ -1,4 +1,4 @@
-const tasks = [
+const tasks = JSON.parse(localStorage.getItem("task_list")) || [
   {
     _id: "5d2ca9e2e03d40b326596aa7",
     completed: true,
@@ -36,6 +36,8 @@ const tasks = [
     accum[task._id] = task;
     return accum;
   }, {});
+
+  tasksObjectToArray(objOfTasks);
 
   const themes = {
     default: {
@@ -210,6 +212,8 @@ const tasks = [
 
       compleateTask(task);
 
+      saveTaskList(objOfTasks);
+
       parent.classList.toggle("bg-success");
 
       refreshButton(target, task);
@@ -235,6 +239,8 @@ const tasks = [
     task.title = title;
     task.body = body;
 
+    saveTaskList(objOfTasks);
+
     return task;
   }
 
@@ -243,6 +249,8 @@ const tasks = [
     const isConfirm = confirm(`Вы уверены, что хотите удалить задачу ${title}`);
     if (!isConfirm) return isConfirm;
     delete objOfTasks[id];
+    saveTaskList(objOfTasks);
+
     return isConfirm;
   }
 
@@ -261,6 +269,7 @@ const tasks = [
     };
 
     objOfTasks[task._id] = task;
+    saveTaskList(objOfTasks);
 
     return { ...task };
   }
@@ -503,5 +512,23 @@ const tasks = [
     Object.entries(selectedThemeObj).forEach(([key, value]) => {
       document.documentElement.style.setProperty(key, value);
     });
+  }
+
+  function tasksObjectToArray(tasksObject) {
+    const arrayOfTasks = Object.entries(tasksObject).reduce(
+      (accum, [_id, task]) => {
+        accum.push(task);
+        return accum;
+      },
+      []
+    );
+
+    return arrayOfTasks;
+  }
+
+  function saveTaskList(tasks) {
+    tasksArray = tasksObjectToArray(tasks);
+
+    localStorage.setItem("task_list", JSON.stringify(tasksArray));
   }
 })(tasks);
